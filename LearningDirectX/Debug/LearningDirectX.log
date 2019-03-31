@@ -1,0 +1,16 @@
+﻿  TmxPolygon.cpp
+c:\users\thinkking\source\repos\learningdirectx\learningdirectx\mapreader\tmxpolygon.cpp(44): error C2660: 'strtok_s': function does not take 2 arguments
+  c:\program files (x86)\windows kits\10\include\10.0.17763.0\ucrt\string.h(64): note: see declaration of 'strtok_s'
+c:\users\thinkking\source\repos\learningdirectx\learningdirectx\mapreader\tmxpolygon.cpp(52): error C4996: 'strtok': This function or variable may be unsafe. Consider using strtok_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.17763.0\ucrt\string.h(440): note: see declaration of 'strtok'
+  TmxPolyline.cpp
+c:\users\thinkking\source\repos\learningdirectx\learningdirectx\mapreader\tmxpolyline.cpp(44): error C2660: 'strtok_s': function does not take 2 arguments
+  c:\program files (x86)\windows kits\10\include\10.0.17763.0\ucrt\string.h(64): note: see declaration of 'strtok_s'
+c:\users\thinkking\source\repos\learningdirectx\learningdirectx\mapreader\tmxpolyline.cpp(52): error C2660: 'strtok_s': function does not take 2 arguments
+  c:\program files (x86)\windows kits\10\include\10.0.17763.0\ucrt\string.h(64): note: see declaration of 'strtok_s'
+  TmxTileLayer.cpp
+c:\users\thinkking\source\repos\learningdirectx\learningdirectx\mapreader\tmxtilelayer.cpp(245): error C2660: 'strtok_s': function does not take 2 arguments
+  c:\program files (x86)\windows kits\10\include\10.0.17763.0\ucrt\string.h(64): note: see declaration of 'strtok_s'
+c:\users\thinkking\source\repos\learningdirectx\learningdirectx\mapreader\tmxtilelayer.cpp(267): error C2660: 'strtok_s': function does not take 2 arguments
+  c:\program files (x86)\windows kits\10\include\10.0.17763.0\ucrt\string.h(64): note: see declaration of 'strtok_s'
+  Generating Code...
