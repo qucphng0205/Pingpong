@@ -13,8 +13,10 @@ class Ball : public Entity {
 	DWORD collideTime;
 	DWORD collideRate;
 	Animation *anim;
+	SideCollision side;
 public:
 	Ball();
+	void SetSide(Entity::SideCollision side) { this->side = side; }
 	void LoadResources();
 	void Update(double dt);
 	void Render();
@@ -26,5 +28,5 @@ public:
 		velocity.y = sqrt(pow(BALL_SPEED, 2) - pow(velocity.x, 2));
 	}
 	void OnCollision(Entity *impactor, CollisionReturn data, SideCollision side, int &goal);
-	void OnCollision(Entity *impactor, SideCollision side, int &goal);
+	void OnCollision(Entity *impactor, int &goal);
 };

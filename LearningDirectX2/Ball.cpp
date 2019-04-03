@@ -81,15 +81,15 @@ void Ball::OnCollision(Entity * impactor, CollisionReturn data, SideCollision si
 			FlipVelX();
 }
 
-void Ball::OnCollision(Entity * impactor, SideCollision side, int & goal) {
+void Ball::OnCollision(Entity * impactor, int & goal) {
 	auto colTag = impactor->GetTag();
 	if (colTag == LeftGoal) {
-		//goal = 2;
+		goal = 2;
 		return;
 	}
 	else
 		if (colTag == RightGoal) {
-			//goal = 1;
+			goal = 1;
 			return;
 		}
 	goal = 0;
@@ -97,5 +97,6 @@ void Ball::OnCollision(Entity * impactor, SideCollision side, int & goal) {
 		FlipVelY();
 	else
 		FlipVelX();
+	side = NotKnow;
 }
 

@@ -87,25 +87,46 @@ void PlayScene::Update(double dt) {
 	CheckCollision();
 
 	if (win != 0) {
-		if (win == 1)
-
-			showTime = GetTickCount() + showTimeRate;
+		showTime = GetTickCount() + showTimeRate;
 		return;
 	}
 
 	HandleInput();
 
-	float collisionTime = 1; //CollisionDetector::SweptAABB(leftPaddle, ball, dt);
+	Entity::SideCollision side;
+
+	float collisionTime = CollisionDetector::SweptAABB(leftPaddle, ball, side, dt);
 	leftPaddle->Update(dt * collisionTime);
-	//collisionTime = CollisionDetector::SweptAABB(rightPaddle, ball, dt);
+	collisionTime = CollisionDetector::SweptAABB(rightPaddle, ball, side, dt);
 	rightPaddle->Update(dt * collisionTime);
 
-	//collisionTime = CollisionDetector::SweptAABB(ball, leftPaddle, dt);
-	//collisionTime = min(CollisionDetector::SweptAABB(ball, rightPaddle, dt), collisionTime);
-	//if (collisionTime != 1)
-	//	collisionTime = collisionTime;
+	collisionTime = 1;
 
-	ball->Update(dt);
+	auto mSide = side;
+	float ct1 = CollisionDetector::SweptAABB(ball, leftPaddle, mSide, dt);
+	if (ct1 != 1) {
+		collisionTime = ct1;
+		side = mSide;
+	}
+	float ct2 = CollisionDetector::SweptAABB(ball, rightPaddle, mSide, dt);
+	if (ct2 != 1 && ct2 < collisionTime) {
+		collisionTime = ct2;
+		side = mSide;
+	}
+	float ct3 = CollisionDetector::SweptAABB(ball, leftScorePaddle, mSide, dt);
+	if (ct3 != 1 && ct3 < collisionTime) {
+		collisionTime = ct3;
+		side = mSide;
+	}
+	float ct4 = CollisionDetector::SweptAABB(ball, rightScorePaddle, mSide, dt);
+	if (ct4 != 1 && ct4 < collisionTime) {
+		collisionTime = ct4;
+		side = mSide;
+	}
+
+	ball->Update(dt * collisionTime);
+	if (collisionTime != 1)
+		ball->SetSide(side);
 }
 
 void PlayScene::CheckCollision(double dt) {
@@ -123,11 +144,10 @@ void PlayScene::CheckCollision(double dt) {
 	for (size_t i = 0; i < collideObjects.size(); i++) {
 		RECT r1 = collideObjects[i]->GetBound();
 		RECT r2 = ball->GetBound();
-
-		float collisionTime = CollisionDetector::SweptAABB(ball, collideObjects[i], side, dt);
-		if (collisionTime == 1)
+		auto data = CollisionDetector::RectAndRect(r1, r2);
+		if (!data.IsCollided)
 			continue;
-		ball->OnCollision(collideObjects[i], side, win);
+		ball->OnCollision(collideObjects[i], win);
 	}
 }
 
