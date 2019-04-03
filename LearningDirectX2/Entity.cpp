@@ -16,6 +16,15 @@ RECT Entity::GetBound() {
 	return r;
 }
 
+Entity::EntityTypes Entity::GetTag() {
+	return tag;
+}
+
+void Entity::SetTag(EntityTypes tag) {
+	this->tag = tag;
+}
+
+
 void Entity::SetPosition(float x, float y) {
 	SetPosition(D3DXVECTOR3(x, y, 0));
 }
@@ -65,6 +74,10 @@ void Entity::SetVelocity(D3DXVECTOR2 vel) {
 	velocity = vel;
 }
 
+D3DXVECTOR2 Entity::GetVelocity() {
+	return velocity;
+}
+
 float Entity::GetVx(){
 	return velocity.x;
 }
@@ -87,6 +100,15 @@ void Entity::SetVy(float vy) {
 
 void Entity::AddVy(float vy) {
 	this->velocity.y += vy;
+}
+
+RECT Entity::GetRect() {
+	RECT r;
+	r.top = position.y - height / 2;
+	r.bottom = r.top + height;
+	r.left = position.x - width / 2;
+	r.right = r.left + width;
+	return r;
 }
 
 void Entity::Update(double dt) {

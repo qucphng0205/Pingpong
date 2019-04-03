@@ -28,36 +28,48 @@ bool CollisionDetector::IsCollide(RECT rect1, RECT rect2) {
 	return true;
 }
 
-Entity::SideCollision CollisionDetector::GetSideCollision(Entity * e1, Entity * e2) {
+Entity::SideCollision CollisionDetector::GetSideCollision4(Entity * e1, Entity::CollisionReturn data) {
 
-	if (!IsCollide(e1->GetBound(), e2->GetBound())) {
-		return Entity::NotKnow;
-	}
+	float xCenter = data.RegionCollision.left + (data.RegionCollision.right - data.RegionCollision.left) / 2.0f;
+	float yCenter = data.RegionCollision.top + (data.RegionCollision.bottom - data.RegionCollision.top) / 2.0f;
+
+	auto e1Width = e1->GetWidth();
+	auto e1Height = e1->GetHeight();
+
+	auto xx = sqrt(pow(e1Width / 2, 2) + pow(e1Height / 2, 2));
+	auto cornerAngle = (e1Width / 2) / sqrt(pow(e1Width / 2, 2) + pow(e1Height / 2, 2));
 
 	Entity::SideCollision result;
+	
+	auto pos1 = e1->GetPosition();
+	auto pos2 = D3DXVECTOR2(xCenter, yCenter);
 
-	float minW = (e1->GetWidth() + e2->GetWidth()) / 2;
-	float minH = (e1->GetHeight() + e2->GetHeight()) / 2;
+	D3DXVECTOR2 direct = D3DXVECTOR2(pos2.x - pos1.x, pos2.y - pos1.y);
+	D3DXVec2Normalize(&direct, &direct);
+	
+	if (abs(abs(direct.x) - abs(cornerAngle)) <= 0.01)
+		return Entity::Corner;
 
-	float tx = (e1->GetPosition().x - e2->GetPosition().x) / minW;
-	float ty = (e1->GetPosition().y - e2->GetPosition().y) / minH;
-
-	if (abs(tx) < abs(ty)) {
-		if (tx < 0)
+	if (direct.y < 0) {
+		if (direct.x <= 1 && direct.x > cornerAngle)
 			result = Entity::Right;
-		else
+		else if (direct.x <= cornerAngle && direct.x >= -cornerAngle)
+			result = Entity::Top;
+		else if (direct.x >= -1 && direct.x < -cornerAngle)
 			result = Entity::Left;
 	}
-
 	else {
-		if (ty < 0)
+		if (direct.x <= 1 && direct.x > cornerAngle)
+			result = Entity::Right;
+		else if (direct.x <= 0.707 && direct.x >= -cornerAngle)
 			result = Entity::Bottom;
-		else
-			result = Entity::Top;
+		else if (direct.x >= -1 && direct.x < -cornerAngle)
+			result = Entity::Left;
 	}
+	return result;
 }
 
-Entity::SideCollision CollisionDetector::GetSideCollision(Entity *e1, Entity::CollisionReturn data)
+Entity::SideCollision CollisionDetector::GetSideCollision8(Entity *e1, Entity::CollisionReturn data)
 {
 	float xCenter = data.RegionCollision.left + (data.RegionCollision.right - data.RegionCollision.left) / 2.0f;
 	float yCenter = data.RegionCollision.top + (data.RegionCollision.bottom - data.RegionCollision.top) / 2.0f;
@@ -134,6 +146,94 @@ Entity::SideCollision CollisionDetector::GetSideCollision(Entity *e1, Entity::Co
 	}
 
 	return Entity::NotKnow;
+}
+
+float CollisionDetector::SweptAABB(Entity * ent1, Entity * ent2, Entity::SideCollision &side, double dt) {
+	RECT r1 = ent1->GetRect();
+	RECT r2 = ent2->GetRect();
+
+	if (IsCollide(r1, r2))
+		return 1.0;
+
+	auto vel = ent1->GetVelocity() * dt;
+	RECT board = GetBoardPhasing(r1, vel.x, vel.y);
+
+	if (!IsCollide(board, r2)) 
+		return 1.0;
+
+	float dxEntry = 0, dxExit = 0;
+	float dyEntry = 0, dyExit = 0;
+
+	//get min distance of 2 coordinate x and y axis
+	if (vel.x > 0) {
+		dxEntry = r2.left - r1.right;
+		dxExit = r2.right - r1.left;
+	}
+	else {
+		dxEntry = r2.right - r1.left;
+		dxExit = r2.left - r1.right;
+	}
+	if (vel.y > 0) {
+		dyEntry = r2.top - r1.bottom;
+		dyExit = r2.bottom - r1.top;
+	}
+	else {
+		dyEntry = r2.bottom - r1.top;
+		dyExit = r2.top - r1.bottom;
+	}
+
+	float txEntry = 0, txExit = 0;
+	float tyEntry = 0, tyExit = 0;
+
+	//get time to meet or break up each other in x and y axis
+	if (vel.x == 0) {
+		txEntry = -std::numeric_limits<float>::infinity();
+		txExit = std::numeric_limits<float>::infinity();
+	}
+	else {
+		txEntry = dxEntry / vel.x;
+		txExit = dxExit / vel.x;
+	}
+	if (vel.y == 0) {
+		tyEntry = -std::numeric_limits<float>::infinity();
+		tyExit = std::numeric_limits<float>::infinity();
+	}
+	else {
+		tyEntry = dyEntry / vel.y;
+		tyExit = dyExit / vel.y;
+	}
+	float entryTime = max(txEntry, tyEntry);
+	float exitTime = min(txExit, tyExit);
+
+	if (entryTime > exitTime || (txEntry < 0.0f && tyEntry < 0.0f) || txEntry > 1 || tyEntry > 1) 
+		return 1;
+	if (txEntry > tyEntry) {
+		if (dxEntry > 0.0f)
+			side = Entity::Right;
+		else
+			side = Entity::Left;
+	}
+	else {
+		if (dyEntry > 0.0f)
+			side = Entity::Bottom;
+		else
+			side = Entity::Top;
+	}
+	return entryTime;
+}
+
+RECT CollisionDetector::GetBoardPhasing(RECT r, float vx, float vy) {
+	RECT board = r;
+	if (vx > 0)
+		board.right += vx;
+	else
+		board.left += vx;
+	if (vy > 0)
+		board.bottom += vy;
+	else
+		board.top += vy;
+
+	return board;
 }
 
 bool CollisionDetector::PointAndRectangle(float x, float y, RECT rect) {

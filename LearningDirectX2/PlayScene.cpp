@@ -13,7 +13,10 @@ PlayScene::PlayScene() {
 	leftPaddle = new LeftPaddle();
 	rightPaddle = new RightPaddle();
 	leftScorePaddle = new ScorePaddle();
+	leftScorePaddle->SetTag(Entity::LeftGoal);
 	rightScorePaddle = new ScorePaddle();
+	rightScorePaddle->SetTag(Entity::RightGoal);
+
 	ball = new Ball();
 
 	Reset();
@@ -44,7 +47,7 @@ void PlayScene::HandleInput() {
 			else
 				if (!KeyBoard::GetInstance()->isPress(VK_DOWN))
 					leftPaddle->Idle();
-		} 
+		}
 		else if (keyCode == VK_DOWN) {
 			if (e.IsPress())
 				leftPaddle->MoveDown();
@@ -62,12 +65,12 @@ void PlayScene::OnMouseMove(float x, float y) {
 
 void PlayScene::Render() {
 	//map->Draw();
-	/*if (GetTickCount() < showTime) {
+	if (GetTickCount() < showTime) {
 		if (win == 1) Graphic::GetInstance()->Draw(0, 0, player1_win_texture);
 		else
 			Graphic::GetInstance()->Draw(0, 0, player2_win_texture);
 		return;
-	}*/
+	}
 	leftPaddle->Render();
 	rightPaddle->Render();
 	leftScorePaddle->Render();
@@ -76,44 +79,55 @@ void PlayScene::Render() {
 }
 
 void PlayScene::Update(double dt) {
-	//if (GetTickCount() < showTime)
-	//	return;
-	//if (win != 0)
-	//	Reset();
-	////win = 0;
+	if (GetTickCount() < showTime)
+		return;
+	if (win != 0)
+		Reset();
+	win = 0;
 	CheckCollision();
+
+	if (win != 0) {
+		if (win == 1)
+
+			showTime = GetTickCount() + showTimeRate;
+		return;
+	}
+
 	HandleInput();
-	leftPaddle->Update(dt);
-	rightPaddle->Update(dt);
-	//ball->CheckCollidePaddle(rightPaddle);
-	//ball->CheckCollidePaddle(leftPaddle);
-	//if (ball->CheckCollidePaddle(rightScorePaddle)) {
-	//	showTime = GetTickCount() + showTimeRate;
-	//	win = 1;
-	//}
-	//else if (ball->CheckCollidePaddle(leftScorePaddle)) {
-	//	showTime = GetTickCount() + showTimeRate;
-	//	win = 2;
-	//}
+
+	float collisionTime = 1; //CollisionDetector::SweptAABB(leftPaddle, ball, dt);
+	leftPaddle->Update(dt * collisionTime);
+	//collisionTime = CollisionDetector::SweptAABB(rightPaddle, ball, dt);
+	rightPaddle->Update(dt * collisionTime);
+
+	//collisionTime = CollisionDetector::SweptAABB(ball, leftPaddle, dt);
+	//collisionTime = min(CollisionDetector::SweptAABB(ball, rightPaddle, dt), collisionTime);
+	//if (collisionTime != 1)
+	//	collisionTime = collisionTime;
+
 	ball->Update(dt);
 }
 
-void PlayScene::CheckCollision() {
+void PlayScene::CheckCollision(double dt) {
 	vector<Entity*> collideObjects;
 	map->GetQuadTree()->Clear();
 	map->GetQuadTree()->Insert(leftPaddle);
 	map->GetQuadTree()->Insert(rightPaddle);
+	map->GetQuadTree()->Insert(leftScorePaddle);
+	map->GetQuadTree()->Insert(rightScorePaddle);
+
 	map->GetQuadTree()->GetAbleCollideEntities(collideObjects, ball);
+
+	Entity::SideCollision side;
+
 	for (size_t i = 0; i < collideObjects.size(); i++) {
-		if (CollisionDetector::IsCollide(collideObjects[i]->GetBound(), ball->GetBound())) {
-			Entity::SideCollision res = CollisionDetector::GetSideCollision(collideObjects[i], ball);
-			if (res == Entity::NotKnow)
-				continue;
-			if (res == Entity::Top || res == Entity::Bottom)
-				ball->FlipVelY();
-			else
-				ball->FlipVelX();
-		}
+		RECT r1 = collideObjects[i]->GetBound();
+		RECT r2 = ball->GetBound();
+
+		float collisionTime = CollisionDetector::SweptAABB(ball, collideObjects[i], side, dt);
+		if (collisionTime == 1)
+			continue;
+		ball->OnCollision(collideObjects[i], side, win);
 	}
 }
 
@@ -123,9 +137,10 @@ void PlayScene::Reset() {
 
 	rightPaddle->SetPosition(bufferWidth - 50 - rightPaddle->GetWidth(), (float)bufferHeight / 2);
 	leftPaddle->SetPosition(50 + leftPaddle->GetWidth(), (float)bufferHeight / 2);
-	leftScorePaddle->SetPosition(leftScorePaddle->GetWidth()/2, (float)bufferHeight / 2);
-	rightScorePaddle->SetPosition(bufferWidth - rightScorePaddle->GetWidth()/2, (float)bufferHeight / 2);
+	leftScorePaddle->SetPosition(leftScorePaddle->GetWidth() / 2, (float)bufferHeight / 2);
+	rightScorePaddle->SetPosition(bufferWidth - rightScorePaddle->GetWidth() / 2, (float)bufferHeight / 2);
 
 	ball->SetPosition(bufferWidth / 2, bufferHeight / 2);
-	ball->SetVelocity(D3DXVECTOR2(BALL_SPEED, BALL_SPEED));
+	ball->SetRandomVelocity();
+	//ball->SetVelocity(D3DXVECTOR2(BALL_SPEED, 0));
 }

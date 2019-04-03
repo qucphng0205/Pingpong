@@ -6,11 +6,13 @@
 #include "MyHelper.h"
 #include "Paddle.h"
 #include "Entity.h"
+#include "Animation.h"
+
 class Ball : public Entity {
 	static bool hasLoadResources;
 	DWORD collideTime;
 	DWORD collideRate;
-	Sprite *sprite;
+	Animation *anim;
 public:
 	Ball();
 	void LoadResources();
@@ -18,5 +20,11 @@ public:
 	void Render();
 	void FlipVelX();
 	void FlipVelY();
-	bool CheckCollidePaddle(Paddle *paddle);
+	void SetRandomVelocity() {
+		srand(time(NULL));
+		velocity.x = rand() % (BALL_SPEED * 2 + 1) + -BALL_SPEED;
+		velocity.y = sqrt(pow(BALL_SPEED, 2) - pow(velocity.x, 2));
+	}
+	void OnCollision(Entity *impactor, CollisionReturn data, SideCollision side, int &goal);
+	void OnCollision(Entity *impactor, SideCollision side, int &goal);
 };

@@ -28,7 +28,8 @@ public:
 		TopRight, //5
 		BottomLeft, //6
 		BottomRight, //7
-		NotKnow
+		NotKnow,
+		Corner
 	};
 	struct CollisionReturn
 	{
@@ -38,13 +39,19 @@ public:
 	enum EntityTypes
 	{
 		None, 
-		Player
+		Ball,
+		Paddle,
+		LeftGoal,
+		RightGoal
 	};
 
 	EntityTypes tag;
 
 	virtual RECT GetBound();
 
+	virtual EntityTypes GetTag();
+	virtual void SetTag(EntityTypes tag);
+	
 	virtual void SetPosition(float x, float y);
 	virtual void SetPosition(D3DXVECTOR2 pos);
 	virtual void SetPosition(D3DXVECTOR3 pos);
@@ -59,6 +66,7 @@ public:
 	virtual void SetHeight(int height);
 	virtual int GetHeight();
 
+	virtual D3DXVECTOR2 GetVelocity();
 	virtual void SetVelocity(D3DXVECTOR2 vel);
 
 	virtual float GetVx();
@@ -68,6 +76,8 @@ public:
 	virtual float GetVy();
 	virtual void SetVy(float vy);
 	virtual void AddVy(float vy);
+
+	virtual RECT GetRect();
 
 	virtual void Update(double dt);
 

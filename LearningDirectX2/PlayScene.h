@@ -29,6 +29,6 @@ public:
 	virtual void OnMouseMove(float x, float y);
 	virtual void Render();
 	virtual void Update(double dt);
-	void CheckCollision();
+	void CheckCollision(double dt = 0.0167f);
 	void Reset();
 };

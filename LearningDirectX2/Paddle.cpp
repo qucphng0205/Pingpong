@@ -24,7 +24,10 @@ void Paddle::Render() {
 void Paddle::Update(double dt) {
 	auto bufferHeight = Graphic::GetInstance()->GetBackBufferHeight();
 	Entity::Update(dt);
-	position.y = MyHelper::Clamp(position.y, 0, bufferHeight - height);
+	position.y = MyHelper::Clamp(position.y, 0, bufferHeight - height/2);
+}
+LeftPaddle::LeftPaddle() {
+	tag = Entity::Paddle;
 }
 //
 void LeftPaddle::MoveUp() {
@@ -35,6 +38,9 @@ void LeftPaddle::MoveDown() {
 }
 void LeftPaddle::Idle() {
 	velocity.y = 0;
+}
+RightPaddle::RightPaddle() {
+	tag = Entity::Paddle;
 }
 //
 void RightPaddle::HandleMouse(float x, float y) {

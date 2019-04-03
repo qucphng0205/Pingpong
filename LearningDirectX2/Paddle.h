@@ -20,6 +20,7 @@ public:
 
 class LeftPaddle : public Paddle {
 public:
+	LeftPaddle();
 	void MoveUp();
 	void MoveDown();
 	void Idle();
@@ -27,6 +28,7 @@ public:
 
 class RightPaddle : public Paddle {
 public:
+	RightPaddle();
 	void HandleMouse(float x, float y);
 	virtual void Update(double dt);
 private:
