@@ -3,6 +3,7 @@
 #include <d3dx9.h>
 class Entity {
 protected:
+	int id;
 
 	//duoc goi khi set position cua Entity, dung cho ke thua
 	virtual void OnSetPosition(D3DXVECTOR3 pos);
@@ -17,6 +18,8 @@ protected:
 	float width, height;
 
 public:
+	static int currentID;
+
 	Entity();
 
 	enum SideCollision {
@@ -77,7 +80,7 @@ public:
 	virtual void SetVy(float vy);
 	virtual void AddVy(float vy);
 
-	virtual RECT GetRect();
+	virtual int GetID();
 
 	virtual void Update(double dt);
 

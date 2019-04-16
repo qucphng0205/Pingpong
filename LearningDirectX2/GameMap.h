@@ -2,7 +2,8 @@
 #include "Sprites.h"
 #include "Textures.h"
 #include "Camera.h"
-#include "QuadTree.h"
+//#include "QuadTree.h"
+#include "Grid.h"
 #include <iostream>
 #include <fstream>
 
@@ -31,13 +32,14 @@ public:
 	int GetHeight();
 	int GetTileWidth();
 	int GetTileHeight();
-	QuadTree *GetQuadTree();
+	Grid *GetGrid();
+	//Grid *grid;
 	void SetCamera(Camera *cam);
 	void Draw();
 
 	~GameMap();
 private:
-	QuadTree *nodes;
+	Grid *grid;
 	void LoadTileset(char *filePath, int tileWidth, int tileHeight);
 	Tileset *tileset;
 	LPCSTR mapPath;

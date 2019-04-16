@@ -1,10 +1,13 @@
 #include "Entity.h"
 
+int Entity::currentID = 0;
+
 void Entity::OnSetPosition(D3DXVECTOR3 pos) {
 }
 
 Entity::Entity() {
 	tag = None;
+	id = ++currentID;
 }
 
 RECT Entity::GetBound() {
@@ -102,13 +105,8 @@ void Entity::AddVy(float vy) {
 	this->velocity.y += vy;
 }
 
-RECT Entity::GetRect() {
-	RECT r;
-	r.top = position.y - height / 2;
-	r.bottom = r.top + height;
-	r.left = position.x - width / 2;
-	r.right = r.left + width;
-	return r;
+int Entity::GetID() {
+	return id;
 }
 
 void Entity::Update(double dt) {

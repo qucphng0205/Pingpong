@@ -7,3 +7,5 @@
 #define PADDLE_SPEED 500
 #define BALL_SPEED 10000
 #define QUADTREE_MAXLEVEL 5
+#define GRID_ROWS 5
+#define GRID_COLUMNS 5

@@ -79,6 +79,9 @@ void PlayScene::Render() {
 }
 
 void PlayScene::Update(double dt) {
+	HandleInput();
+
+
 	if (GetTickCount() < showTime)
 		return;
 	if (win != 0)
@@ -87,68 +90,59 @@ void PlayScene::Update(double dt) {
 	CheckCollision();
 
 	if (win != 0) {
+		if (win == 1)
+			
 		showTime = GetTickCount() + showTimeRate;
 		return;
 	}
 
-	HandleInput();
-
 	Entity::SideCollision side;
 
-	float collisionTime = CollisionDetector::SweptAABB(leftPaddle, ball, side, dt);
+	float collisionTime = 1; CollisionDetector::SweptAABB(leftPaddle, ball, side, dt);
 	leftPaddle->Update(dt * collisionTime);
 	collisionTime = CollisionDetector::SweptAABB(rightPaddle, ball, side, dt);
 	rightPaddle->Update(dt * collisionTime);
 
-	collisionTime = 1;
+	//collisionTime = CollisionDetector::SweptAABB(ball, leftPaddle, dt);
+	//collisionTime = min(CollisionDetector::SweptAABB(ball, rightPaddle, dt), collisionTime);
+	//if (collisionTime != 1)
+	//	collisionTime = collisionTime;
 
-	auto mSide = side;
-	float ct1 = CollisionDetector::SweptAABB(ball, leftPaddle, mSide, dt);
-	if (ct1 != 1) {
-		collisionTime = ct1;
-		side = mSide;
-	}
-	float ct2 = CollisionDetector::SweptAABB(ball, rightPaddle, mSide, dt);
-	if (ct2 != 1 && ct2 < collisionTime) {
-		collisionTime = ct2;
-		side = mSide;
-	}
-	float ct3 = CollisionDetector::SweptAABB(ball, leftScorePaddle, mSide, dt);
-	if (ct3 != 1 && ct3 < collisionTime) {
-		collisionTime = ct3;
-		side = mSide;
-	}
-	float ct4 = CollisionDetector::SweptAABB(ball, rightScorePaddle, mSide, dt);
-	if (ct4 != 1 && ct4 < collisionTime) {
-		collisionTime = ct4;
-		side = mSide;
-	}
-
-	ball->Update(dt * collisionTime);
-	if (collisionTime != 1)
-		ball->SetSide(side);
+	ball->Update(dt);
 }
 
 void PlayScene::CheckCollision(double dt) {
 	vector<Entity*> collideObjects;
-	map->GetQuadTree()->Clear();
-	map->GetQuadTree()->Insert(leftPaddle);
-	map->GetQuadTree()->Insert(rightPaddle);
-	map->GetQuadTree()->Insert(leftScorePaddle);
-	map->GetQuadTree()->Insert(rightScorePaddle);
-
-	map->GetQuadTree()->GetAbleCollideEntities(collideObjects, ball);
+	map->GetGrid()->Clear();
+	map->GetGrid()->InsertEntity(leftPaddle);
+	map->GetGrid()->InsertEntity(rightPaddle);
+	//map->GetGrid()->InsertEntity(leftScorePaddle);
+	//map->GetGrid()->InsertEntity(rightScorePaddle);
+	map->GetGrid()->GetEntityWithRect(collideObjects, ball->GetBound());
 
 	Entity::SideCollision side;
 
 	for (size_t i = 0; i < collideObjects.size(); i++) {
 		RECT r1 = collideObjects[i]->GetBound();
 		RECT r2 = ball->GetBound();
-		auto data = CollisionDetector::RectAndRect(r1, r2);
-		if (!data.IsCollided)
+
+		float collisionTime = CollisionDetector::SweptAABB(ball, collideObjects[i], side, dt);
+		if (collisionTime == 1)
 			continue;
-		ball->OnCollision(collideObjects[i], win);
+		else
+			ball->OnCollision(collideObjects[i], side, win);
 	}
+	//for (size_t i = 0; i < collideObjects.size(); i++)
+	//	for (int j = 0; j < collideObjects.size(); j++) 
+	//		if (i != j) {
+	//			if (CollisionDetector::IsCollide(collideObjects[i]->GetBound(), collideObjects[j]->GetBound())) {
+	//				//Xuly Collision;
+	//				//swept aabb de phat hien va cham o side nao ? top left bottom hay right
+	//				collideObjects[i]->OnCollision(collideObjects[j], side);
+	//				//swept 
+	//				collideObjects[j]->OnCollision(collideObjects[i], side);
+	//			}
+	//		}
 }
 
 void PlayScene::Reset() {
@@ -160,7 +154,7 @@ void PlayScene::Reset() {
 	leftScorePaddle->SetPosition(leftScorePaddle->GetWidth() / 2, (float)bufferHeight / 2);
 	rightScorePaddle->SetPosition(bufferWidth - rightScorePaddle->GetWidth() / 2, (float)bufferHeight / 2);
 
-	ball->SetPosition(bufferWidth / 2, bufferHeight / 2);
+	ball->SetPosition(bufferWidth /2 , bufferHeight / 2);
 	ball->SetRandomVelocity();
-	//ball->SetVelocity(D3DXVECTOR2(BALL_SPEED, 0));
+	ball->SetVelocity(D3DXVECTOR2(BALL_SPEED, BALL_SPEED));
 }

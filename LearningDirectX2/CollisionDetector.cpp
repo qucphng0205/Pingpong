@@ -149,14 +149,21 @@ Entity::SideCollision CollisionDetector::GetSideCollision8(Entity *e1, Entity::C
 }
 
 float CollisionDetector::SweptAABB(Entity * ent1, Entity * ent2, Entity::SideCollision &side, double dt) {
-	RECT r1 = ent1->GetRect();
-	RECT r2 = ent2->GetRect();
+	RECT r1 = ent1->GetBound();
+	RECT r2 = ent2->GetBound();
+
+	D3DXVECTOR2 vel2 = ent2->GetVelocity() * dt;
 
 	if (IsCollide(r1, r2))
 		return 1.0;
 
 	auto vel = ent1->GetVelocity() * dt;
-	RECT board = GetBoardPhasing(r1, vel.x, vel.y);
+	RECT board = GetBoardPhasing(r1, vel.x - vel2.x, vel.y - vel2.y);
+
+	auto deltaVX = vel.x - vel2.x;
+	auto deltaVY = vel.y - vel2.y;
+
+	auto deltaVel = vel - vel2;
 
 	if (!IsCollide(board, r2)) 
 		return 1.0;
@@ -165,7 +172,7 @@ float CollisionDetector::SweptAABB(Entity * ent1, Entity * ent2, Entity::SideCol
 	float dyEntry = 0, dyExit = 0;
 
 	//get min distance of 2 coordinate x and y axis
-	if (vel.x > 0) {
+	if (deltaVel.x > 0) {
 		dxEntry = r2.left - r1.right;
 		dxExit = r2.right - r1.left;
 	}
@@ -173,7 +180,7 @@ float CollisionDetector::SweptAABB(Entity * ent1, Entity * ent2, Entity::SideCol
 		dxEntry = r2.right - r1.left;
 		dxExit = r2.left - r1.right;
 	}
-	if (vel.y > 0) {
+	if (deltaVel.y > 0) {
 		dyEntry = r2.top - r1.bottom;
 		dyExit = r2.bottom - r1.top;
 	}
@@ -186,21 +193,21 @@ float CollisionDetector::SweptAABB(Entity * ent1, Entity * ent2, Entity::SideCol
 	float tyEntry = 0, tyExit = 0;
 
 	//get time to meet or break up each other in x and y axis
-	if (vel.x == 0) {
+	if (deltaVel.x == 0) {
 		txEntry = -std::numeric_limits<float>::infinity();
 		txExit = std::numeric_limits<float>::infinity();
 	}
 	else {
-		txEntry = dxEntry / vel.x;
-		txExit = dxExit / vel.x;
+		txEntry = dxEntry / deltaVel.x;
+		txExit = dxExit / deltaVel.x;
 	}
-	if (vel.y == 0) {
+	if (deltaVel.y == 0) {
 		tyEntry = -std::numeric_limits<float>::infinity();
 		tyExit = std::numeric_limits<float>::infinity();
 	}
 	else {
-		tyEntry = dyEntry / vel.y;
-		tyExit = dyExit / vel.y;
+		tyEntry = dyEntry / deltaVel.y;
+		tyExit = dyExit / deltaVel.y;
 	}
 	float entryTime = max(txEntry, tyEntry);
 	float exitTime = min(txExit, tyExit);

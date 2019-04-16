@@ -35,7 +35,7 @@ LPSPRITE Tileset::GetSprite(int id) {
 GameMap::GameMap() {
 	auto bufferWidth = Graphic::GetInstance()->GetBackBufferWidth();
 	auto bufferHeight = Graphic::GetInstance()->GetBackBufferHeight();
-	nodes = new QuadTree(1, MyHelper::ToRect(0, bufferWidth, 0, bufferHeight));
+	grid = new Grid(MyHelper::ToRect(0, bufferWidth, 0, bufferHeight), 1, 1);
 }
 
 GameMap::GameMap(char * tilesetPath, int tileWidth, int tileHeight) {
@@ -62,7 +62,7 @@ void GameMap::SetMapPath(char * mapPath) {
 
 int GameMap::GetWidth() {
 	return tileset->GetTileWidth() * columns;
-}	
+}
 
 int GameMap::GetHeight() {
 	return tileset->GetTileHeight() * rows;
@@ -76,8 +76,8 @@ int GameMap::GetTileHeight() {
 	return tileset->GetTileHeight();
 }
 
-QuadTree * GameMap::GetQuadTree() {
-	return nodes;
+Grid * GameMap::GetGrid() {
+	return grid;
 }
 
 void GameMap::SetCamera(Camera * cam) {
@@ -85,8 +85,8 @@ void GameMap::SetCamera(Camera * cam) {
 }
 
 void GameMap::Draw() {
-	auto heightPos = Graphic::GetInstance()->GetBackBufferHeight()/2;
-	auto widthPos = Graphic::GetInstance()->GetBackBufferWidth()/2;
+	auto heightPos = Graphic::GetInstance()->GetBackBufferHeight() / 2;
+	auto widthPos = Graphic::GetInstance()->GetBackBufferWidth() / 2;
 
 	D3DXVECTOR2 trans = D3DXVECTOR2(widthPos - camera->GetPosition().x, heightPos - camera->GetPosition().y);
 
@@ -101,7 +101,7 @@ void GameMap::Draw() {
 			for (int n = 0; n < this->columns; n++) {
 				int id = mapIDs[m][n];
 				LPSPRITE sprite = tileset->GetSprite(id);
-				
+
 				RECT spriteBound;
 				spriteBound.top = m * tileHeight;
 				spriteBound.bottom = spriteBound.top + tileHeight;
@@ -117,39 +117,39 @@ void GameMap::Draw() {
 			}
 	}
 
-		////xet layer tu tren xuong, tu trai qua phai
-		//for (int m = 0; m < ->GetHeight(); m++) {
-		//	for (int  n = 0; n < layer->GetWidth(); n++) {
-		//		//lay thu tu (index = id) tileset cua tile dang xet
-		//		int tilesetIndex = layer->GetTileTilesetIndex(n, m);
-		//		if (tilesetIndex == -1)
-		//			continue;
-		//		//lay tileset cua tile dang xet
-		//		const Tmx::Tileset *tileset = map->GetTileset(tilesetIndex);
+	////xet layer tu tren xuong, tu trai qua phai
+	//for (int m = 0; m < ->GetHeight(); m++) {
+	//	for (int  n = 0; n < layer->GetWidth(); n++) {
+	//		//lay thu tu (index = id) tileset cua tile dang xet
+	//		int tilesetIndex = layer->GetTileTilesetIndex(n, m);
+	//		if (tilesetIndex == -1)
+	//			continue;
+	//		//lay tileset cua tile dang xet
+	//		const Tmx::Tileset *tileset = map->GetTileset(tilesetIndex);
 
-		//		//Lay so row va column cua tileset
-		//		int tilesetWidth = tileset->GetImage()->GetWidth() / tileWidth;
-		//		int tilesetHeight = tileset->GetImage()->GetHeight() / tileHeight;
+	//		//Lay so row va column cua tileset
+	//		int tilesetWidth = tileset->GetImage()->GetWidth() / tileWidth;
+	//		int tilesetHeight = tileset->GetImage()->GetHeight() / tileHeight;
 
-		//		LPSPRITE sprite = listTileset[layer->GetTileTilesetIndex(n, m)];
-		//		//Lay id cua tile trong layer
-		//		int tileID = layer->GetTileId(n, m);
-		//		//Tim vi tri cua tileID trong tileset
-		//		int y = tileID / tilesetWidth;
-		//		int x = tileID - y * tilesetWidth;
-		//		//lay Rect tu tileset
-		//		sourceRect.top = y * tileHeight;
-		//		sourceRect.bottom = sourceRect.top + tileHeight;
-		//		sourceRect.left = x * tileWidth;
-		//		sourceRect.right = sourceRect.left + tileWidth;
-		//		//ve theo n, m
-		//		D3DXVECTOR3 position(n * tileWidth + tileWidth / 2, m*tileHeight + tileHeight / 2, 0);
-		//		sprite->SetHeight(tileHeight);
-		//		sprite->SetWidth(tileWidth);
-		//		sprite->Draw(position, sourceRect, D3DXVECTOR2(), trans);
-		//	}
-		//}
+	//		LPSPRITE sprite = listTileset[layer->GetTileTilesetIndex(n, m)];
+	//		//Lay id cua tile trong layer
+	//		int tileID = layer->GetTileId(n, m);
+	//		//Tim vi tri cua tileID trong tileset
+	//		int y = tileID / tilesetWidth;
+	//		int x = tileID - y * tilesetWidth;
+	//		//lay Rect tu tileset
+	//		sourceRect.top = y * tileHeight;
+	//		sourceRect.bottom = sourceRect.top + tileHeight;
+	//		sourceRect.left = x * tileWidth;
+	//		sourceRect.right = sourceRect.left + tileWidth;
+	//		//ve theo n, m
+	//		D3DXVECTOR3 position(n * tileWidth + tileWidth / 2, m*tileHeight + tileHeight / 2, 0);
+	//		sprite->SetHeight(tileHeight);
+	//		sprite->SetWidth(tileWidth);
+	//		sprite->Draw(position, sourceRect, D3DXVECTOR2(), trans);
+	//	}
 	//}
+//}
 }
 
 GameMap::~GameMap() {

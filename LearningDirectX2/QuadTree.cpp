@@ -76,7 +76,6 @@ void QuadTree::GetAbleCollideEntities(std::vector<Entity*> &entities, Entity * e
 			entities.push_back(child);
 		return;
 	}
-
 	int index = this->GetIndex(entity->GetBound());
 	if (index != -1) {
 		for (auto child : myEntities)

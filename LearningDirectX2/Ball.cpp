@@ -29,16 +29,16 @@ void Ball::Update(double dt) {
 
 	auto bufferHeight = Graphic::GetInstance()->GetBackBufferHeight();
 	auto bufferWidth = Graphic::GetInstance()->GetBackBufferWidth();
-	
+
 
 	Entity::Update(dt);
 
-	position.x = MyHelper::Clamp(position.x, 0, bufferWidth - width/2);
-	position.y = MyHelper::Clamp(position.y, 0, bufferHeight - height/2);
+	position.x = MyHelper::Clamp(position.x, 0 + width / 2, bufferWidth - width / 2);
+	position.y = MyHelper::Clamp(position.y, 0 + height / 2, bufferHeight - height / 2);
 
-	if (position.y <= 0 || position.y + height >= bufferHeight)
+	if (position.y - height / 2 <= 0 || position.y + height / 2 >= bufferHeight)
 		FlipVelY();
-	if (position.x <= 0 || position.x + width >= bufferWidth)
+	if (position.x - width / 2 <= 0 || position.x + width / 2 >= bufferWidth)
 		FlipVelX();
 }
 
@@ -81,15 +81,15 @@ void Ball::OnCollision(Entity * impactor, CollisionReturn data, SideCollision si
 			FlipVelX();
 }
 
-void Ball::OnCollision(Entity * impactor, int & goal) {
+void Ball::OnCollision(Entity * impactor, SideCollision side, int & goal) {
 	auto colTag = impactor->GetTag();
 	if (colTag == LeftGoal) {
-		goal = 2;
+		//goal = 2;
 		return;
 	}
 	else
 		if (colTag == RightGoal) {
-			goal = 1;
+			//goal = 1;
 			return;
 		}
 	goal = 0;
@@ -97,6 +97,5 @@ void Ball::OnCollision(Entity * impactor, int & goal) {
 		FlipVelY();
 	else
 		FlipVelX();
-	side = NotKnow;
 }
 

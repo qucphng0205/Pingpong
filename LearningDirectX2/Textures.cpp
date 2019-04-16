@@ -37,7 +37,7 @@ void Textures::Add(int id, LPCSTR path, D3DCOLOR transparentColor) {
 		return;
 	}
 	textures[id] = texture;
-	DebugOut(L"[INFO] Texture loaded Ok: id=%d, %s \n", id, path);
+	//DebugOut(L"[INFO] Texture loaded Ok: id=%d, %s \n", id, path);
 }
 
 LPDIRECT3DTEXTURE9 Textures::Get(unsigned int i) {
